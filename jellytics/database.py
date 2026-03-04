@@ -24,6 +24,14 @@ async def init_db() -> None:
         await conn.run_sync(Base.metadata.create_all)
 
 
+async def _ensure_init() -> None:
+    """Lazy init for test contexts where lifespan doesn't run."""
+    global AsyncSessionLocal
+    if AsyncSessionLocal is None:
+        await init_db()
+
+
 async def get_session():
+    await _ensure_init()
     async with AsyncSessionLocal() as session:
         yield session
