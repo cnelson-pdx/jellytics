@@ -1,0 +1,24 @@
+{% if NotificationType == "PlaybackStart" -%}
+User: {{ NotificationUsername }}
+Content: {{ display_title }}{% if Year %} ({{ Year }}){% endif %}
+Type: {{ Type }}
+Client: {{ ClientName }} on {{ DeviceName }}
+Method: {{ PlayMethod or "Unknown" }}{% if is_transcode %} 🔴 Transcoding{% else %} 🟢 Direct{% endif %}
+{% if video_resolution %}Resolution: {{ video_resolution }}{% endif %}
+{% if Bitrate %}Bitrate: {{ "%.1f"|format(Bitrate / 1_000_000) }} Mbps{% endif %}
+{%- elif NotificationType == "PlaybackStop" -%}
+User: {{ NotificationUsername }}
+Content: {{ display_title }}
+{% if completion_pct is not none %}Watched: {{ "%.0f"|format(completion_pct) }}%{% endif %}
+{% if PlayedToCompletion %}✅ Completed{% endif %}
+Client: {{ ClientName }} on {{ DeviceName }}
+{%- elif NotificationType == "ItemAdded" -%}
+New content added to your Jellyfin server:
+{{ display_title }}{% if Year %} ({{ Year }}){% endif %}
+Type: {{ Type }}
+{% if Genres %}Genres: {{ Genres | join(", ") }}{% endif %}
+{%- else -%}
+Event: {{ NotificationType }}
+User: {{ NotificationUsername }}
+Content: {{ display_title }}
+{%- endif %}

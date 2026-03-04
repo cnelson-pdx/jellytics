@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Jellytics{% endblock %}
+{% block nav_home %}active{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-title">Dashboard</div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="card">
+      <div class="card-title">Plays Today</div>
+      <div class="card-value">{{ plays_today }}</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Plays This Week</div>
+      <div class="card-value">{{ plays_week }}</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Plays This Month</div>
+      <div class="card-value">{{ plays_month }}</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Active Streams</div>
+      <div class="card-value">{{ active_sessions | length }}</div>
+    </div>
+  </div>
+
+  <!-- Currently Playing -->
+  {% if active_sessions %}
+  <div class="card" style="margin-bottom:1.5rem">
+    <div class="card-title"><span class="active-dot"></span>Currently Playing</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>User</th><th>Title</th><th>Client</th><th>Device</th>
+            <th>Method</th><th>Progress</th><th>Started</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in active_sessions %}
+          <tr>
+            <td>{{ s.user.username if s.user else "Unknown" }}</td>
+            <td>{{ s.item.display_title if s.item else "Unknown" }}</td>
+            <td>{{ s.client_name or "—" }}</td>
+            <td>{{ s.device_name or "—" }}</td>
+            <td>
+              {% if s.play_method == "Transcode" %}
+                <span class="badge badge-transcode">Transcode</span>
+              {% elif s.play_method %}
+                <span class="badge badge-direct">Direct</span>
+              {% else %}—{% endif %}
+            </td>
+            <td>
+              {% if s.completion_pct is not none %}
+              <div class="progress-bar"><div class="progress-fill" style="width:{{ s.completion_pct }}%"></div></div>
+              <small style="color:var(--text-muted)">{{ "%.0f"|format(s.completion_pct) }}%</small>
+              {% else %}—{% endif %}
+            </td>
+            <td style="color:var(--text-muted);font-size:0.8rem">{{ s.started_at.strftime("%H:%M") }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="two-col">
+    <!-- Top Users -->
+    <div class="card">
+      <div class="card-title">Top Users (30 days)</div>
+      {% if top_users %}
+      <table>
+        <thead><tr><th>User</th><th>Plays</th></tr></thead>
+        <tbody>
+          {% for username, plays in top_users %}
+          <tr>
+            <td>{{ username }}</td>
+            <td><strong>{{ plays }}</strong></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state">No plays yet.</div>
+      {% endif %}
+    </div>
+
+    <!-- Top Content -->
+    <div class="card">
+      <div class="card-title">Top Content (30 days)</div>
+      {% if top_content %}
+      <table>
+        <thead><tr><th>Title</th><th>Type</th><th>Plays</th></tr></thead>
+        <tbody>
+          {% for title, media_type, plays in top_content %}
+          <tr>
+            <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ title }}</td>
+            <td>
+              {% set mt = media_type | lower %}
+              {% if mt == "movie" %}<span class="badge badge-movie">Movie</span>
+              {% elif mt == "episode" %}<span class="badge badge-episode">Episode</span>
+              {% elif mt == "audio" %}<span class="badge badge-audio">Audio</span>
+              {% else %}<span class="badge badge-other">{{ media_type }}</span>{% endif %}
+            </td>
+            <td><strong>{{ plays }}</strong></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state">No plays yet.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="two-col">
+    <!-- Recent Plays -->
+    <div class="card">
+      <div class="card-title">Recent Plays</div>
+      {% if recent_plays %}
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>When</th><th>User</th><th>Title</th><th>%</th></tr></thead>
+          <tbody>
+            {% for h in recent_plays %}
+            <tr>
+              <td style="color:var(--text-muted);font-size:0.8rem;white-space:nowrap">{{ h.watched_at.strftime("%m/%d %H:%M") }}</td>
+              <td>{{ h.username }}</td>
+              <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ h.display_title }}</td>
+              <td style="color:var(--text-muted)">
+                {% if h.completion_pct is not none %}{{ "%.0f"|format(h.completion_pct) }}%{% else %}—{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div style="text-align:right;margin-top:0.75rem"><a href="/history">View all →</a></div>
+      {% else %}
+      <div class="empty-state">No plays recorded yet.<br><small>Configure the Jellyfin webhook plugin to POST to <code>/webhook/jellyfin</code></small></div>
+      {% endif %}
+    </div>
+
+    <!-- Recent Notifications -->
+    <div class="card">
+      <div class="card-title">Recent Notifications</div>
+      {% if recent_notifications %}
+      <table>
+        <thead><tr><th>When</th><th>Agent</th><th>Title</th><th>OK</th></tr></thead>
+        <tbody>
+          {% for n in recent_notifications %}
+          <tr>
+            <td style="color:var(--text-muted);font-size:0.8rem;white-space:nowrap">{{ n.sent_at.strftime("%m/%d %H:%M") }}</td>
+            <td>{{ n.agent_name }}</td>
+            <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ n.title }}">{{ n.title }}</td>
+            <td>{% if n.success %}✅{% else %}<span title="{{ n.error_message }}">❌</span>{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state">No notifications sent yet.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div style="text-align:right;color:var(--text-muted);font-size:0.75rem;margin-top:0.5rem">Generated {{ generated_at }}</div>
+</div>
+{% endblock %}

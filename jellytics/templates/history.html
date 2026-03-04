@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Watch History — Jellytics{% endblock %}
+{% block nav_history %}active{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-title">Watch History</div>
+
+  <div class="card" style="margin-bottom:1rem">
+    <form class="filter-bar" method="get" action="/history">
+      <select name="user">
+        <option value="">All Users</option>
+        {% for u in all_users %}
+        <option value="{{ u }}" {% if u == filter_user %}selected{% endif %}>{{ u }}</option>
+        {% endfor %}
+      </select>
+      <select name="media_type">
+        <option value="">All Types</option>
+        {% for t in all_media_types %}
+        <option value="{{ t }}" {% if t == filter_media_type %}selected{% endif %}>{{ t }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit">Filter</button>
+      {% if filter_user or filter_media_type %}<a href="/history" style="color:var(--text-muted);padding:6px 8px">Clear</a>{% endif %}
+    </form>
+    <div style="color:var(--text-muted);font-size:0.8rem">{{ total }} records</div>
+  </div>
+
+  <div class="card">
+    {% if history %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>When</th><th>User</th><th>Title</th><th>Type</th>
+            <th>Client</th><th>Method</th><th>Duration</th><th>%</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for h in history %}
+          <tr>
+            <td style="color:var(--text-muted);font-size:0.8rem;white-space:nowrap">{{ h.watched_at.strftime("%Y-%m-%d %H:%M") }}</td>
+            <td>{{ h.username }}</td>
+            <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ h.display_title }}">{{ h.display_title }}</td>
+            <td>
+              {% set mt = h.media_type | lower %}
+              {% if mt == "movie" %}<span class="badge badge-movie">Movie</span>
+              {% elif mt == "episode" %}<span class="badge badge-episode">Episode</span>
+              {% elif mt == "audio" %}<span class="badge badge-audio">Audio</span>
+              {% else %}<span class="badge badge-other">{{ h.media_type }}</span>{% endif %}
+            </td>
+            <td style="color:var(--text-muted);font-size:0.8rem">{{ h.client_name or "—" }}</td>
+            <td>
+              {% if h.play_method == "Transcode" %}<span class="badge badge-transcode">Transcode</span>
+              {% elif h.play_method %}<span class="badge badge-direct">Direct</span>
+              {% else %}—{% endif %}
+            </td>
+            <td style="color:var(--text-muted);font-size:0.8rem">
+              {% if h.duration_seconds %}{{ "%.0f"|format(h.duration_seconds / 60) }}m{% else %}—{% endif %}
+            </td>
+            <td style="color:var(--text-muted)">
+              {% if h.completion_pct is not none %}{{ "%.0f"|format(h.completion_pct) }}%{% else %}—{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if pages > 1 %}
+    <div class="pagination">
+      {% if page > 1 %}<a href="?page={{ page - 1 }}&user={{ filter_user }}&media_type={{ filter_media_type }}">← Prev</a>{% endif %}
+      <span>{{ page }} / {{ pages }}</span>
+      {% if page < pages %}<a href="?page={{ page + 1 }}&user={{ filter_user }}&media_type={{ filter_media_type }}">Next →</a>{% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">No watch history yet.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

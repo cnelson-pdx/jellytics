@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Jellytics{% endblock %}</title>
+  <style>
+    :root {
+      --bg: #0f0f14;
+      --surface: #1a1a24;
+      --surface2: #22222e;
+      --border: #2e2e3e;
+      --accent: #00b4d8;
+      --accent2: #7b2fbe;
+      --text: #e0e0e8;
+      --text-muted: #888899;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --error: #f44336;
+      --transcode: #ff6b35;
+      --direct: #4caf50;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Nav */
+    nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 1.5rem; display: flex; align-items: center; gap: 2rem; height: 56px; }
+    .nav-brand { font-weight: 700; font-size: 1.2rem; color: var(--accent); letter-spacing: 0.05em; }
+    .nav-brand span { color: var(--text-muted); font-weight: 400; font-size: 0.8em; }
+    .nav-links { display: flex; gap: 1.5rem; }
+    .nav-links a { color: var(--text-muted); font-size: 0.9rem; padding: 4px 0; border-bottom: 2px solid transparent; }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); text-decoration: none; border-bottom-color: var(--accent); }
+
+    /* Layout */
+    .container { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+    .page-title { font-size: 1.4rem; font-weight: 600; margin-bottom: 1.5rem; color: var(--text); }
+
+    /* Cards */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; }
+    .card-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 0.75rem; }
+    .card-value { font-size: 2rem; font-weight: 700; color: var(--accent); }
+
+    /* Grids */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+    @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* Tables */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    th { text-align: left; padding: 0.6rem 1rem; background: var(--surface2); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border); }
+    td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface2); }
+
+    /* Badges */
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; }
+    .badge-transcode { background: #ff6b3520; color: var(--transcode); border: 1px solid #ff6b3540; }
+    .badge-direct { background: #4caf5020; color: var(--direct); border: 1px solid #4caf5040; }
+    .badge-movie { background: #7b2fbe20; color: #c084fc; border: 1px solid #7b2fbe40; }
+    .badge-episode { background: #0077b620; color: #38bdf8; border: 1px solid #0077b640; }
+    .badge-audio { background: #ff980020; color: #fbbf24; border: 1px solid #ff980040; }
+    .badge-other { background: #44444820; color: var(--text-muted); border: 1px solid #44444840; }
+
+    /* Active session */
+    .active-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); display: inline-block; margin-right: 6px; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    /* Progress bar */
+    .progress-bar { background: var(--surface2); border-radius: 4px; height: 6px; overflow: hidden; min-width: 80px; }
+    .progress-fill { height: 100%; border-radius: 4px; background: var(--accent); transition: width 0.3s; }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 3rem; color: var(--text-muted); }
+
+    /* Pagination */
+    .pagination { display: flex; gap: 0.5rem; align-items: center; justify-content: center; margin-top: 1.5rem; }
+    .pagination a, .pagination span { padding: 6px 12px; border-radius: 6px; font-size: 0.875rem; }
+    .pagination a { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+    .pagination a:hover { background: var(--surface2); text-decoration: none; }
+    .pagination span { background: var(--accent); color: #fff; border: 1px solid var(--accent); }
+
+    /* Filter bar */
+    .filter-bar { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .filter-bar select, .filter-bar input { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 6px; font-size: 0.875rem; }
+    .filter-bar button { background: var(--accent); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 0.875rem; cursor: pointer; }
+  </style>
+</head>
+<body>
+<nav>
+  <div class="nav-brand">Jellytics <span>v0.1</span></div>
+  <div class="nav-links">
+    <a href="/" class="{% block nav_home %}{% endblock %}">Dashboard</a>
+    <a href="/history" class="{% block nav_history %}{% endblock %}">History</a>
+  </div>
+</nav>
+{% block content %}{% endblock %}
+</body>
+</html>

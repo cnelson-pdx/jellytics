@@ -1,0 +1,6 @@
+{% if NotificationType == "PlaybackStart" %}▶ {{ NotificationUsername }} started {{ display_title }}
+{% elif NotificationType == "PlaybackStop" %}⏹ {{ NotificationUsername }} stopped {{ display_title }}
+{% elif NotificationType == "PlaybackProgress" %}⏩ {{ NotificationUsername }} watching {{ display_title }}
+{% elif NotificationType == "ItemAdded" %}📥 New: {{ display_title }}
+{% else %}🎬 Jellytics: {{ NotificationType }}
+{% endif %}

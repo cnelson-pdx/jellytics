@@ -1,0 +1,48 @@
+# Jellytics Configuration
+# Copy to config.yaml and adjust
+
+jellyfin:
+  url: "http://192.168.3.2:8096"
+  api_key: ""          # Admin API key from Jellyfin Dashboard → API Keys
+
+server:
+  host: "0.0.0.0"
+  port: 8234
+  # Publicly accessible URL (used for artwork proxy links in notifications)
+  public_url: "http://localhost:8234"
+
+database:
+  url: "sqlite+aiosqlite:///./data/jellytics.db"
+
+# Notification agents — each entry uses an Apprise URL
+# See https://github.com/caronc/apprise/wiki for all supported services
+notifications:
+  agents: []
+  # Examples:
+  # - name: "My Discord"
+  #   url: "discord://webhook_id/webhook_token"
+  #   triggers: [playback_start, playback_stop, item_added]
+  #   template: "default"    # template name (see jellytics/templates/notifications/)
+  #
+  # - name: "Telegram"
+  #   url: "tgram://bot_token/chat_id"
+  #   triggers: [item_added]
+  #   template: "item_added"
+  #
+  # - name: "Ntfy"
+  #   url: "ntfy://ntfy.sh/my-jellytics-topic"
+  #   triggers: [playback_start]
+  #
+  # - name: "Email digest"
+  #   url: "mailtos://user:pass@smtp.example.com?to=you@example.com"
+  #   triggers: [item_added]
+  #   template: "item_added"
+
+  # Trigger conditions (optional — leave empty to notify on all events)
+  conditions:
+    # Only notify for these media types (Movie, Episode, Audio, MusicVideo)
+    # media_types: [Movie, Episode]
+    # Only notify for these users (display names)
+    # users: []
+    # Minimum playback percentage to log as "watched" (0-100)
+    min_completion_pct: 0

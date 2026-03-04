@@ -1,0 +1,25 @@
+services:
+  jellytics:
+    build: .
+    image: jellytics:latest
+    container_name: jellytics
+    restart: unless-stopped
+    ports:
+      - "8234:8234"
+    volumes:
+      - jellytics_data:/data
+      - ./config.yaml:/app/config.yaml:ro
+    environment:
+      - JELLYTICS_CONFIG=/app/config.yaml
+      # Override any config.yaml values via env vars:
+      # - JELLYFIN_URL=http://your-jellyfin:8096
+      # - JELLYFIN_API_KEY=your_key
+      # - DATABASE_URL=sqlite+aiosqlite:////data/jellytics.db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8234/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  jellytics_data:
